@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shaleadnotes</title>
+    <style>
+        :root {
+            --primary-color: #a78bfa;
+            --primary-hover: #c4b5fd;
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e5e7eb;
+            --border-color: #333333;
+            --muted-color: #9ca3af;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding-bottom: 120px;
+        }
+
+        body.right-handed .fab-container { right: 25px; left: auto; }
+        body.left-handed .fab-container { left: 25px; right: auto; }
+
+        header {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        h1 { font-size: 1.6rem; color: var(--primary-color); margin: 0; }
+
+        .settings-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 8px 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+
+        .section-title {
+            width: 100%;
+            max-width: 600px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: var(--muted-color);
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        #notes-container {
+            width: 100%;
+            max-width: 600px;
+            display: grid;
+            gap: 14px;
+        }
+
+        .note-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--primary-color);
+            padding: 16px;
+            border-radius: 14px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .note-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 6px;
+            color: var(--text-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .version-badge {
+            font-size: 0.7rem;
+            background: rgba(167, 139, 250, 0.15);
+            color: var(--primary-color);
+            padding: 2px 6px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .version-badge:hover { background: rgba(167, 139, 250, 0.3); }
+
+        .note-card p {
+            margin: 0 0 12px 0;
+            white-space: pre-wrap;
+            word-break: break-word;
+            color: var(--muted-color);
+            font-size: 0.95rem;
+        }
+
+        .image-grid {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        .image-grid img {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+        }
+
+        .note-meta {
+            font-size: 0.75rem;
+            color: var(--muted-color);
+            margin-bottom: 10px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .note-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            color: var(--muted-color);
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 6px;
+            border-radius: 6px;
+        }
+        .action-btn:hover {
+            color: var(--text-color);
+            background: rgba(255,255,255,0.05);
+        }
+        .delete-action:hover { color: #ef4444; }
+
+        .fab-container {
+            position: fixed;
+            bottom: 230px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 100;
+        }
+
+        .version-fab {
+            position: fixed;
+            left: 20px;
+            top: 48%;
+            transform: translateY(-50%);
+            width: 48px;
+            height: 48px;
+            background-color: var(--card-bg);
+            color: var(--primary-color);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            cursor: pointer;
+            z-index: 100;
+        }
+        .version-fab:hover { border-color: var(--primary-color); background-color: #262626; }
+
+        .fab {
+            width: 56px;
+            height: 56px;
+            background-color: var(--primary-color);
+            color: #121212;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(167, 139, 250, 0.4);
+            cursor: pointer;
+            border: none;
+        }
+        .fab:hover { background-color: var(--primary-hover); }
+
+        .fab-search { background-color: #262626; color: var(--text-color); border: 1px solid var(--border-color); font-size: 20px; }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 1000; padding: 16px; box-sizing: border-box;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .modal {
+            background: var(--card-bg); width: 100%; max-width: 500px;
+            padding: 20px; border-radius: 16px; border: 1px solid var(--border-color);
+            max-height: 85vh; overflow-y: auto;
+        }
+
+        .modal h2 { margin-top: 0; color: var(--primary-color); font-size: 1.3rem; }
+
+        input[type="text"], textarea {
+            width: 100%; background: #121212; border: 1px solid var(--border-color);
+            color: var(--text-color); padding: 12px; border-radius: 10px;
+            font-family: inherit; box-sizing: border-box; margin-bottom: 12px; font-size: 0.95rem;
+        }
+        textarea { height: 120px; resize: vertical; }
+
+        .modal-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+
+        .file-input-label {
+            cursor: pointer; color: var(--primary-color); font-weight: 500; font-size: 0.9rem;
+            background: rgba(167, 139, 250, 0.1); padding: 8px 12px; border-radius: 8px; display: inline-block;
+        }
+        #image-input { display: none; }
+        
+        .editor-image-list { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+        .editor-thumb-container { position: relative; display: inline-block; }
+        .editor-thumb-container img { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border-color); }
+        .remove-thumb {
+            position: absolute; top: -6px; right: -6px; background: #ef4444; color: white;
+            border: none; border-radius: 50%; width: 18px; height: 18px; font-size: 10px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+        }
+
+        #lightbox-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); display: flex; justify-content: center; align-items: center;
+            z-index: 2000; opacity: 0; pointer-events: none; transition: opacity 0.2s;
+        }
+        #lightbox-modal.active { opacity: 1; pointer-events: auto; }
+        #lightbox-img { max-width: 90%; max-height: 90vh; border-radius: 8px; }
+
+        .btn-primary { background: var(--primary-color); color: #121212; border: none; padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .btn-secondary { background: #333; color: var(--text-color); border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; }
+        .settings-option { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-color); }
+        
+        .history-item { background: #121212; border: 1px solid var(--border-color); padding: 10px; border-radius: 8px; margin-bottom: 8px; font-size: 0.85rem; }
+        .history-timestamp { color: var(--primary-color); font-weight: bold; margin-bottom: 4px; }
+    </style>
+    <link rel="manifest" href="manifest.json">
+</head>
+<body class="right-handed">
+
+    <header>
+        <h1>Shaleadnotes</h1>
+        <button class="settings-btn" onclick="toggleSettings(true)">⚙️</button>
+    </header>
+
+    <div class="section-title">📝 GENERAL NOTES</div>
+
+    <div id="notes-container"></div>
+
+    <button class="version-fab" onclick="openGlobalHistory()" title="Version Control History">Hist</button>
+
+    <div class="fab-container">
+        <button class="fab fab-search" onclick="searchNotes()" title="Search Notes">🔍</button>
+        <button class="fab" onclick="toggleModal(true)" title="Add Note">+</button>
+    </div>
+
+    <!-- Note Editor Modal -->
+    <div class="modal-overlay" id="noteModal" onclick="handleOutsideClick(event)">
+        <div class="modal">
+            <h2 id="modal-title">New Note</h2>
+            <input type="text" id="noteTitleInput" placeholder="Note Title...">
+            <textarea id="noteText" placeholder="Write thoughts, text, or paste content..."></textarea>
+            
+            <div style="margin-bottom: 12px;">
+                <label style="font-size: 0.85rem; color: var(--muted-color); display: block; margin-bottom: 4px;">⏰ Custom Reminder & Calendar Sync</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="noteReminderInput" placeholder="Select or type date/time..." style="margin-bottom:0; flex:1;" onclick="this.type='datetime-local';">
+                    <button type="button" class="btn-secondary" onclick="addToCalendar()" style="padding: 0 12px; font-size: 0.8rem;">📅 Calendar</button>
+                </div>
+            </div>
+
+            <div class="editor-image-list" id="editorImageList"></div>
+            
+            <div class="modal-actions">
+                <label class="file-input-label">
+                    📷 Add Images
+                    <input type="file" id="image-input" accept="image/*" multiple onchange="appendImages(event)">
+                </label>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn-secondary" onclick="toggleModal(false)">Cancel</button>
+                    <button class="btn-primary" onclick="saveNote()">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Version History Modal -->
+    <div class="modal-overlay" id="historyModal" onclick="handleHistoryOutsideClick(event)">
+        <div class="modal">
+            <h2>Version Control Ledger (30 Days)</h2>
+            <div id="history-content" style="margin-top: 10px;"></div>
+            <div style="margin-top: 20px; text-align: right;">
+                <button class="btn-secondary" onclick="toggleHistory(false)">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lightbox Viewer Modal -->
+    <div id="lightbox-modal" onclick="closeLightbox()">
+        <img id="lightbox-img" src="" alt="Fullscreen View">
+    </div>
+
+    <!-- Settings & Preferences Modal (Gear Menu) -->
+    <div class="modal-overlay" id="settingsModal" onclick="handleSettingsOutsideClick(event)">
+        <div class="modal">
+            <h2>Settings & Preferences</h2>
+            
+            <div class="settings-option">
+                <div>
+                    <strong>Layout Handedness</strong>
+                    <div style="font-size: 0.8rem; color: var(--muted-color);">Choose button placement preference</div>
+                </div>
+                <div style="display: flex; gap: 6px;">
+                    <button class="btn-secondary" id="leftHandBtn" onclick="setHandedness('left')">Left</button>
+                    <button class="btn-primary" id="rightHandBtn" onclick="setHandedness('right')">Right</button>
+                </div>
+            </div>
+
+            <div class="settings-option">
+                <div>
+                    <strong>Import Database</strong>
+                    <div style="font-size: 0.8rem; color: var(--muted-color);">Restore notes from a .json file</div>
+                </div>
+                <button class="btn-secondary" onclick="importNotes()">Import</button>
+            </div>
+
+            <div class="settings-option">
+                <div>
+                    <strong>Export Database (Standalone Backup)</strong>
+                    <div style="font-size: 0.8rem; color: var(--muted-color);">Immediate download to device storage</div>
+                </div>
+                <button class="btn-primary" onclick="triggerManualBackup()">Export Now</button>
+            </div>
+
+            <div style="margin-top: 20px; text-align: right;">
+                <button class="btn-secondary" onclick="toggleSettings(false)">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let db;
+        let currentImages = [];
+        let editingNoteId = null;
+        let editingNoteHistory = [];
+        let searchQuery = "";
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const savedHand = localStorage.getItem("shalead_hand") || "right";
+            setHandedness(savedHand, false);
+            
+            if (navigator.storage && navigator.storage.persist) {
+                navigator.storage.persist().then(persistent => {
+                    if (persistent) {
+                        console.log("Storage will not be cleared except by explicit user action.");
+                    }
+                });
+            }
+        });
+
+        function setHandedness(hand, save = true) {
+            document.body.className = hand === "left" ? "left-handed" : "right-handed";
+            if (hand === "left") {
+                document.getElementById('leftHandBtn').className = "btn-primary";
+                document.getElementById('rightHandBtn').className = "btn-secondary";
+            } else {
+                document.getElementById('rightHandBtn').className = "btn-primary";
+                document.getElementById('leftHandBtn').className = "btn-secondary";
+            }
+            if (save) {
+                localStorage.setItem("shalead_hand", hand);
+            }
+        }
+
+        const request = indexedDB.open("ShaleadnotesDB", 14);
+        request.onerror = (e) => console.error("DB error", e);
+        request.onsuccess = (e) => {
+            db = e.target.result;
+            loadNotes();
+        };
+        request.onupgradeneeded = (e) => {
+            db = e.target.result;
+            if (!db.objectStoreNames.contains("notes")) {
+                db.createObjectStore("notes", { keyPath: "id", autoIncrement: true });
+            }
+        };
+
+        function toggleModal(open, note = null) {
+            const modal = document.getElementById('noteModal');
+            if (open) {
+                modal.classList.add('active');
+                if (note) {
+                    document.getElementById('modal-title').innerText = "Edit Note";
+                    document.getElementById('noteTitleInput').value = note.title || '';
+                    document.getElementById('noteText').value = note.text || '';
+                    document.getElementById('noteReminderInput').value = note.reminder || '';
+                    editingNoteId = note.id;
+                    editingNoteHistory = note.history || [];
+                    
+                    if (note.images && Array.isArray(note.images)) {
+                        currentImages = [...note.images];
+                    } else if (note.image) {
+                        currentImages = [note.image];
+                    } else {
+                        currentImages = [];
+                    }
+                    renderEditorThumbnails();
+                } else {
+                    document.getElementById('modal-title').innerText = "New Note";
+                    document.getElementById('noteTitleInput').value = '';
+                    document.getElementById('noteText').value = '';
+                    document.getElementById('noteReminderInput').value = '';
+                    editingNoteId = null;
+                    editingNoteHistory = [];
+                    currentImages = [];
+                    renderEditorThumbnails();
+                }
+                document.getElementById('noteTitleInput').focus();
+            } else {
+                modal.classList.remove('active');
+                currentImages = [];
+            }
+        }
+
+        function handleOutsideClick(event) {
+            if (event.target.id === 'noteModal') toggleModal(false);
+        }
+
+        function toggleSettings(open) {
+            const modal = document.getElementById('settingsModal');
+            if (open) modal.classList.add('active');
+            else modal.classList.remove('active');
+        }
+
+        function handleSettingsOutsideClick(event) {
+            if (event.target.id === 'settingsModal') toggleSettings(false);
+        }
+
+        function toggleHistory(open) {
+            const modal = document.getElementById('historyModal');
+            if (open) modal.classList.add('active');
+            else modal.classList.remove('active');
+        }
+
+        function handleHistoryOutsideClick(event) {
+            if (event.target.id === 'historyModal') toggleHistory(false);
+        }
+
+        function appendImages(event) {
+            const files = event.target.files;
+            if (!files || files.length === 0) return;
+
+            let loadedCount = 0;
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentImages.push(e.target.result);
+                    loadedCount++;
+                    if (loadedCount === files.length) {
+                        renderEditorThumbnails();
+                    }
+                }
+                reader.readAsDataURL(file);
+            });
+            event.target.value = '';
+        }
+
+        function removeEditorImage(index) {
+            currentImages.splice(index, 1);
+            renderEditorThumbnails();
+        }
+
+        function renderEditorThumbnails() {
+            const container = document.getElementById('editorImageList');
+            container.innerHTML = '';
+            currentImages.forEach((imgSrc, idx) => {
+                const div = document.createElement('div');
+                div.className = 'editor-thumb-container';
+                div.innerHTML = `
+                    <img src="${imgSrc}" alt="Thumbnail">
+                    <button type="button" class="remove-thumb" onclick="removeEditorImage(${idx})">×</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function openLightbox(imgSrc) {
+            document.getElementById('lightbox-img').src = imgSrc;
+            document.getElementById('lightbox-modal').classList.add('active');
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox-modal').classList.remove('active');
+        }
+
+        function addToCalendar() {
+            const title = document.getElementById('noteTitleInput').value.trim() || "Shaleadnote Reminder";
+            const text = document.getElementById('noteText').value.trim();
+            const reminderVal = document.getElementById('noteReminderInput').value;
+
+            if (!reminderVal) {
+                alert("Please select or type a date and time for the reminder first.");
+                return;
+            }
+
+            const parsedDate = new Date(reminderVal);
+            if (isNaN(parsedDate.getTime())) {
+                alert("Please select a valid date/time format.");
+                return;
+            }
+
+            const startTime = parsedDate.toISOString().replace(/-|:|\.\d\d\d/g, "");
+            const endTime = new Date(parsedDate.getTime() + 60*60*1000).toISOString().replace(/-|:|\.\d\d\d/g, "");
+
+            const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${startTime}/${endTime}&details=${encodeURIComponent(text)}`;
+            window.open(googleUrl, '_blank');
+        }
+
+        function saveNote() {
+            const title = document.getElementById('noteTitleInput').value.trim();
+            const text = document.getElementById('noteText').value.trim();
+            const reminder = document.getElementById('noteReminderInput').value.trim();
+            if (!title && !text && currentImages.length === 0) return;
+
+            const words = text ? text.split(/\s+/).filter(Boolean).length : 0;
+            const chars = text.length;
+            const now = new Date().toLocaleString();
+
+            const transaction = db.transaction(["notes"], "readwrite");
+            const store = transaction.objectStore("notes");
+
+            if (editingNoteId) {
+                const getReq = store.get(editingNoteId);
+                getReq.onsuccess = () => {
+                    const existing = getReq.result;
+                    let history = existing.history || editingNoteHistory || [];
+                    
+                    const cutoff = Date.now() - (30 * 24 * 60 * 60 * 1000);
+                    history = history.filter(h => h.timestamp > cutoff);
+
+                    history.push({
+                        date: existing.date || now,
+                        timestamp: Date.now(),
+                        title: existing.title,
+                        text: existing.text,
+                        images: existing.images || (existing.image ? [existing.image] : [])
+                    });
+
+                    const updatedNote = {
+                        id: editingNoteId,
+                        title: title || "Untitled Note",
+                        text: text,
+                        images: [...currentImages],
+                        words: words,
+                        chars: chars,
+                        reminder: reminder,
+                        date: now,
+                        history: history
+                    };
+
+                    store.put(updatedNote).onsuccess = () => {
+                        toggleModal(false);
+                        loadNotes();
+                    };
+                };
+            } else {
+                const newNote = {
+                    title: title || "Untitled Note",
+                    text: text,
+                    images: [...currentImages],
+                    words: words,
+                    chars: chars,
+                    reminder: reminder,
+                    date: now,
+                    history: []
+                };
+
+                store.add(newNote).onsuccess = () => {
+                    toggleModal(false);
+                    loadNotes();
+                };
+            }
+        }
+
+        function loadNotes() {
+            const container = document.getElementById('notes-container');
+            container.innerHTML = '';
+
+            const transaction = db.transaction(["notes"], "readonly");
+            const store = transaction.objectStore("notes");
+            const request = store.openCursor(null, 'prev');
+
+            request.onsuccess = (event) => {
+                const cursor = event.target.result;
+                if (cursor) {
+                    const note = cursor.value;
+                    
+                    const matchesSearch = !searchQuery || 
+                        (note.title && note.title.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                        (note.text && note.text.toLowerCase().includes(searchQuery.toLowerCase()));
+
+                    if (matchesSearch) {
+                        const card = document.createElement('div');
+                        card.className = 'note-card';
+
+                        let imgsList = note.images || (note.image ? [note.image] : []);
+                        let imagesHtml = '';
+                        if (imgsList.length > 0) {
+                            imagesHtml += '<div class="image-grid">';
+                            imgsList.forEach(img => {
+                                imagesHtml += `<img src="${img}" alt="Attachment" onclick="openLightbox('${img}')">`;
+                            });
+                            imagesHtml += '</div>';
+                        }
+
+                        let contentHtml = `
+                            <div class="note-title">
+                                <span>📝 ${escapeHtml(note.title)}</span>
+                                <span class="version-badge" onclick='showNoteHistory(${JSON.stringify(note).replace(/'/g, "&#39;")})'>History (${(note.history || []).length + 1})</span>
+                            </div>`;
+                        if (note.text) contentHtml += `<p>${escapeHtml(note.text)}</p>`;
+                        contentHtml += imagesHtml;
+                        if (note.reminder) contentHtml += `<div style="font-size:0.75rem; color:#a78bfa; margin-bottom:6px;">⏰ Reminder: ${escapeHtml(note.reminder)}</div>`;
+
+                        card.innerHTML = `
+                            ${contentHtml}
+                            <div class="note-meta">
+                                <span>Words: ${note.words || 0} | Chars: ${note.chars || 0}</span>
+                                <span>${note.date}</span>
+                            </div>
+                            <div class="note-footer">
+                                <button class="action-btn" onclick='editNote(${JSON.stringify(note).replace(/'/g, "&#39;")})'>✏️ Edit</button>
+                                <button class="action-btn delete-action" onclick="deleteNote(${note.id})">🗑️ Delete</button>
+                            </div>
+                        `;
+                        container.appendChild(card);
+                    }
+                    cursor.continue();
+                }
+            };
+        }
+
+        function searchNotes() {
+            searchQuery = prompt("Search notes by keyword:", searchQuery || "") || "";
+            loadNotes();
+        }
+
+        function editNote(note) {
+            toggleModal(true, note);
+        }
+
+        function deleteNote(id) {
+            if (!confirm("Delete this note?")) return;
+            const transaction = db.transaction(["notes"], "readwrite");
+            const store = transaction.objectStore("notes");
+            const request = store.delete(id);
+
+            request.onsuccess = () => {
+                loadNotes();
+            };
+        }
+
+        function showNoteHistory(note) {
+            const content = document.getElementById('history-content');
+            let allEntries = [...(note.history || []), { date: note.date, title: note.title, text: note.text, images: note.images || (note.image ? [note.image] : []), current: true }];
+            allEntries.reverse();
+
+            let html = `<h3 style="color:var(--primary-color); margin-top:0;">${escapeHtml(note.title)}</h3>`;
+            allEntries.forEach((h) => {
+                let hImgs = h.images || [];
+                let hImgsHtml = '';
+                if (hImgs.length > 0) {
+                    hImgsHtml += '<div class="image-grid" style="margin-top:6px;">';
+                    hImgs.forEach(img => {
+                        hImgsHtml += `<img src="${img}" alt="History Image" onclick="openLightbox('${img}')">`;
+                    });
+                    hImgsHtml += '</div>';
+                }
+
+                html += `
+                    <div class="history-item">
+                        <div class="history-timestamp">🕒 ${h.date} ${h.current ? '(Current State)' : ''}</div>
+                        <div style="font-weight:bold; margin-bottom:2px;">Title: ${escapeHtml(h.title)}</div>
+                        <div style="color:var(--muted-color); white-space:pre-wrap; margin-bottom:6px;">${escapeHtml(h.text)}</div>
+                        ${hImgsHtml}
+                    </div>
+                `;
+            });
+
+            content.innerHTML = html;
+            toggleHistory(true);
+        }
+
+        function openGlobalHistory() {
+            const transaction = db.transaction(["notes"], "readonly");
+            const store = transaction.objectStore("notes");
+            const getAll = store.getAll();
+
+            getAll.onsuccess = () => {
+                const notes = getAll.result;
+                let html = `<p style="color:var(--muted-color);">Complete revision ledger across all notes (up to 30 days):</p>`;
+                
+                notes.forEach(note => {
+                    html += `<div style="margin-bottom:15px; border-bottom:1px solid var(--border-color); padding-bottom:10px;">`;
+                    html += `<strong style="color:var(--primary-color);">Note: ${escapeHtml(note.title)}</strong>`;
+                    let entries = [...(note.history || []), { date: note.date, title: note.title, text: note.text, current: true }];
+                    entries.reverse();
+                    entries.forEach(e => {
+                        html += `
+                            <div class="history-item" style="margin-top:6px;">
+                                <div class="history-timestamp">${e.date} ${e.current ? '(Current)' : ''}</div>
+                                <div style="color:var(--text-color);">${escapeHtml(e.text)}</div>
+                            </div>
+                        `;
+                    });
+                    html += `</div>`;
+                });
+
+                document.getElementById('history-content').innerHTML = html;
+                toggleHistory(true);
+            };
+        }
+
+        function triggerManualBackup() {
+            const transaction = db.transaction(["notes"], "readonly");
+            const store = transaction.objectStore("notes");
+            const getAllRequest = store.getAll();
+
+            getAllRequest.onsuccess = () => {
+                const notes = getAllRequest.result;
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(notes, null, 2));
+                const a = document.createElement('a');
+                a.href = dataStr;
+                a.download = `shaleadnotes_database_export_${new Date().toISOString().slice(0,10)}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            };
+        }
+
+        function importNotes() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = event => {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = e => {
+                    try {
+                        const notes = JSON.parse(e.target.result);
+                        const transaction = db.transaction(["notes"], "readwrite");
+                        const store = transaction.objectStore("notes");
+
+                        notes.forEach(note => { store.put(note); });
+
+                        transaction.oncomplete = () => {
+                            loadNotes();
+                            alert("Database successfully imported and restored!");
+                            toggleSettings(false);
+                        };
+                    } catch (err) {
+                        alert("Invalid backup file format.");
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+    </script>
+</body>
+</html>
