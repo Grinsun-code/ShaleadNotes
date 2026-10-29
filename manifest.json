@@ -2,6 +2,7 @@
   "name": "Shaleadnotes",
   "short_name": "Shaleadnotes",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#121212",
   "theme_color": "#a78bfa",
