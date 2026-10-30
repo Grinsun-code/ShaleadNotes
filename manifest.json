@@ -3,7 +3,7 @@
   "dir": "ltr",
   "display": "standalone",
   "name": "shaleadnotes",
-  "short_name": "Notes-Shalead",
+  "short_name": "NotesShalead",
   "start_url": "/",
   "scope": "/",
   "orientation": "portrait",
